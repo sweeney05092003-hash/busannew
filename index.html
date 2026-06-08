@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>釜山浪漫之旅 🇰🇷</title>
+    <style>
+        :root {
+            --primary-color: #6E85B7;
+            --accent-color: #B9F3FC;
+            --bg-color: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --text-color: #333333;
+            --text-muted: #666666;
+            --success-color: #4E9F3D;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 70px; /* 為底部導航留空間 */
+        }
+
+        header {
+            background: linear-gradient(135deg, #6E85B7, #B9F3FC);
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* 預算看板 */
+        .budget-dashboard {
+            background: var(--card-bg);
+            margin: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .budget-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+            padding-left: 8px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-box {
+            background: #F1F6F9;
+            padding: 10px 5px;
+            border-radius: 8px;
+        }
+
+        .stat-box .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .stat-box .value {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .remain-box {
+            background: #E8F9FD;
+            color: #2192FF;
+        }
+
+        /* 記帳輸入區 */
+        .calc-section {
+            background: #F9F9F9;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .calc-section h4 {
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #DDD;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .input-group button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .expense-list {
+            max-height: 120px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            list-style: none;
+        }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px dashed #EEE;
+        }
+
+        .delete-btn {
+            color: #FF6B6B;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        /* 行程內容區 */
+        .tab-content {
+            display: none;
+            padding: 15px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .timeline-item {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            position: relative;
+            border-left: 4px solid #E4DCCF;
+        }
+
+        .timeline-item.important {
+            border-left-color: #FF8E9E;
+        }
+
+        .timeline-item.food {
+            border-left-color: #FFD384;
+        }
+
+        .timeline-time {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .timeline-title {
+            font-size: 1.05rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .timeline-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .badge {
+            background: #FFE3E3;
+            color: #FF6B6B;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .badge-pass {
+            background: #E8F9FD;
+            color: #2192FF;
+        }
+
+        .link-btn {
+            display: inline-flex;
+            align-items: center;
+            background: #F3F1F5;
+            color: #513252;
+            text-decoration: none;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-top: 8px;
+            margin-right: 5px;
+            border: 1px solid #EAEAEA;
+        }
+
+        /* 警告彈性區 */
+        .notice-box {
+            background: #FFFDE7;
+            border: 1px solid #FFF59D;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #5D4037;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        /* 底部導航欄 */
+        .nav-tabs {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 0;
+            border: none;
+            background: none;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            font-weight: bold;
+            background-color: #F5F7FB;
+            border-top: 3px solid var(--primary-color);
+        }
+
+        .copy-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: none;
+            z-index: 2000;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>釜山盛夏之旅 🇰🇷</h1>
+        <p>2026/06/22 ~ 06/26 (5天4夜)</p>
+    </header>
+
+    <div id="summary" class="tab-content active">
+        <div class="budget-dashboard">
+            <div class="budget-title">💰 全局預算記帳中心</div>
+            <div class="grid-3">
+                <div class="stat-box">
+                    <div class="label">總預算</div>
+                    <div class="value" style="color: #333;">$30,000</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">機酒固定支出</div>
+                    <div class="value" style="color: #FF6B6B;">$13,166</div>
+                </div>
+                <div class="stat-box remain-box">
+                    <div class="label">當前剩餘</div>
+                    <div class="value" id="total-remain">$16,834</div>
+                </div>
+            </div>
+            
+            <div class="calc-section">
+                <h4>✨ 實時記帳（請輸入台幣金額）</h4>
+                <div class="input-group">
+                    <input type="text" id="exp-name" placeholder="品項（如：烤肉）">
+                    <input type="number" id="exp-amount" placeholder="金額 (TWD)">
+                    <button onclick="addExpense()">新增</button>
+                </div>
+                <ul class="expense-list" id="expense-list">
+                    </ul>
+            </div>
+        </div>
+
+        <div class="timeline-item important">
+            <div class="timeline-title">✈️ 航班資訊</div>
+            <div class="timeline-desc">
+                <strong>去程：</strong>06/22 12:00 TPE T1 → 15:30 PUS<br>
+                <strong>回程：</strong>06/26 21:05 PUS → 22:25 TPE T1<br>
+                <span class="badge" style="background:#E1FFB1; color:#4E9F3D;">機票已付：$9,873</span>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-title">🏨 住宿飯店</div>
+            <div class="timeline-desc">
+                <strong>Busan H-AVENUE Hotel</strong><br>
+                西面站1號出口步行12分鐘。舒適床具評價極高。<br>
+                <span class="badge" style="background:#E1FFB1; color:#4E9F3D;">住宿已付：$2,768 (均攤)</span>
+                <a href="https://naver.me/x5GuJgfB" target="_blank" class="link-btn">🗺️ Naver Map</a>
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="timeline-title">🎟️ 預備票券參考</div>
+            <div class="timeline-desc">
+                釜山 pass BIG3: $875 / BIG5: $1,264<br>
+                宵夜外送推薦：60雞炸雞 (60계치킨) 🍗
+            </div>
+        </div>
+    </div>
+
+    <div id="day1" class="tab-content">
+        <div class="timeline-item">
+            <div class="timeline-time">15:30</div>
+            <div class="timeline-title">🛬 抵達金海機場</div>
+            <div class="timeline-desc">搭乘機場輕軌至「沙上站」，轉乘地鐵2號線（綠色）至「西面站」，1號出口步行12分鐘至飯店辦理 Check-in / 寄放行李。</div>
+        </div>
+        <div class="timeline-item food">
+            <div class="timeline-time">18:00</div>
+            <div class="timeline-title">🥣 晚餐抉擇（二選一）</div>
+            <div class="timeline-desc">
+                <strong>1. 83獬豸 (83해치)</strong> <span class="badge">必排隊</span><br>
+                需使用 Catch Table 先行候位！<br>
+                <span style="font-size:0.8rem; color:#888;" onclick="copyText('Busan Busanjin-gu Bujeon-dong 142-8')">📍 點我複製英文地址</span><br>
+                <a href="https://naver.me/G58gLMg2" target="_blank" class="link-btn">🗺️ Naver</a>
+                <a href="https://www.bigfang.tw/blog/post/83haechi-bbq-seomyeon/amp" target="_blank" class="link-btn">📝 食記</a>
+                <br><br>
+                <strong>2. 烤肉的男子</strong><br>
+                <a href="https://naver.me/xJcumHdk" target="_blank" class="link-btn">🗺️ Naver Map</a>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-time">20:30</div>
+            <div class="timeline-title">🛍️ 西面 / 田浦商圈散步</div>
+            <div class="timeline-desc">吃飽後在熱鬧的西面與田浦街區逛逛。記得去 GS25 便利商店找找看冷凍庫裡的「杜Q餅🍫」！</div>
+        </div>
+    </div>
+
+    <div id="day2" class="tab-content">
+        <div class="timeline-item food">
+            <div class="timeline-time">09:00</div>
+            <div class="timeline-title">🥐 早餐：La Feuille 或 All Sunday Bagel</div>
+            <div class="timeline-desc">
+                地鐵2號線廣安站3號出口走12分鐘。<br>
+                <a href="https://naver.me/Fso0mK3N" target="_blank" class="link-btn">🗺️ La Feuille Naver</a>
+            </div>
+        </div>
+        <div class="timeline-item food">
+            <div class="timeline-time">11:30</div>
+            <div class="timeline-title">🥣 午餐：尾浦家 生醃海鮮 (廣安里店)</div>
+            <div class="timeline-desc">
+                從早餐店步行約14分鐘。推薦：鮑魚海鮮鍋飯、生醃套餐。<br>
+                <span class="badge badge-pass">⭐ 釜山 PASS 有折扣</span><br>
+                <a href="https://naver.me/5k7fyc3a" target="_blank" class="link-btn">🗺️ Naver Map</a>
+            </div>
+        </div>
+        <div class="timeline-item important">
+            <div class="timeline-time">14:00</div>
+            <div class="timeline-title">🏎️ Skyline Luge 斜坡滑車</div>
+            <div class="timeline-desc">
+                搭乘 Uber 約33分鐘 (車資約 ₩16,100 / $327)。<br>
+                <span class="badge badge-pass">⭐ 門票適用釜山 PASS</span><br>
+                💡 玩完有空檔可順道去旁邊的樂天超市逛逛。<br>
+                <a href="https://naver.me/IDFUcLWo" target="_blank" class="link-btn">🗺️ Naver Map</a>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-time">16:30</div>
+            <div class="timeline-title">☕ 廣安里文創小店與咖啡廳選品</div>
+            <div class="timeline-desc">
+                搭 Uber 回廣安里約20分鐘 (₩13,900 / $282)。<br>
+                ● 雜貨：cozy mosy, orange bars<br>
+                ● 咖啡：Fill the bill (甜甜圈🍩), chaseoncheak<br>
+                <a href="https://naver.me/IGsqI1JU" target="_blank" class="link-btn">🗺️ cozy mosy</a>
+            </div>
+        </div>
+        <div class="timeline-item food">
+            <div class="timeline-time">18:00</div>
+            <div class="timeline-title">🥣 晚餐：水邊最高豬肉湯飯 (廣安店)</div>
+            <div class="timeline-desc">
+                搭乘公車約10分鐘即可到達。推薦經典豬肉湯飯、血腸。<br>
+                <a href="https://naver.me/GdymdeQF" target="_blank" class="link-btn">🗺️ Naver Map</a>
+            </div>
+        </div>
+        <div class="timeline-item important">
+            <div class="timeline-time">19:30</div>
+            <div class="timeline-title">⛵ Yacht Holic 夜景遊艇體驗</div>
+            <div class="timeline-desc">享受極致的廣安大橋海景與璀璨夜色璀璨璀璨。</div>
+        </div>
+    </div>
+
+    <div id="day3" class="tab-content">
+        <div class="timeline-item food">
+            <div class="timeline-time">10:00</div>
+            <div class="timeline-title">🥣 早午餐：元祖鮑魚粥 + 自然島鹽麵包</div>
+            <div class="timeline-desc">
+                元祖鮑魚粥 (約 ₩15,000 / $300)。<br>
+                再步行10分鐘去買自然島鹽麵包 (出爐時間 9:00/12:30，一袋 ₩12,000 / $244)。<br>
+                吃完去海雲台海水浴場沙灘散步。<br>
+                <a href="https://naver.me/5Q373T5s" target="_blank" class="link-btn">🗺️ 鮑魚粥</a>
+                <a href="https://naver.me/xrSQSF2f" target="_blank" class="link-btn">🗺️ 鹽麵包</a>
+                <a href="https://naver.me/F0z2RxAs" target="_blank" class="link-btn">🗺️ 海雲台</a>
+            </div>
+        </div>
+        <div class="timeline-item important">
+            <div class="timeline-time">12:30</div>
+            <div class="timeline-title">🚃 海雲台天空膠囊列車 (尾浦站 → 青沙浦站)</div>
+            <div class="timeline-desc">
+                從海雲台步行約13分鐘抵達尾浦站。搭乘高空彩色膠囊列車。<br>
+                <span class="badge" style="background:#E1FFB1; color:#4E9F3D;">車票已付：$525 (均攤)</span><br>
+                抵達青沙浦後看海拍照，推薦海景咖啡廳：Liberta 或 DIART。<br>
+                <a href="https://naver.me/FafyrnAe" target="_blank" class="link-btn">🗺️ 尾浦站</a>
+                <a href="https://naver.me/xq3aEIjM" target="_blank" class="link-btn">🗺️ 青沙浦</a>
+                <a href="https://naver.me/FIfsazL" target="_blank" class="link-btn">🗺️ Liberta</a>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-time">15:30</div>
+            <div class="timeline-title">🛍️ 新世界百貨 + Spa Land 頂級汗蒸幕</div>
+            <div class="timeline-desc">
+                搭乘 Uber 約18分鐘 (₩11,100 / $225)。<br>
+                💡 先到新世界百貨3樓辦理會員卡可享折扣！B1 必逛 Tamburins, GM, Kitty。<br>
+                <span class="badge badge-pass">⭐ Spa Land 門票免費 (憑釜山PASS)</span><br>
+                <strong>晚餐推薦：</strong>直接在 Spa Land 裡面體驗韓劇經典的煮泡麵🍜！<br>
+                <a href="https://naver.me/5Q372Aqt" target="_blank" class="link-btn">🗺️ Spa Land</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="day4" class="tab-content">
+        <div class="notice-box">
+            <strong>💡 彈性變更提醒：</strong><br>
+            請確認 D2 滑車時開啟的「釜山 PASS」24/48小時效期何時截止。如果時間比較緊湊，今日行程建議更改順序為：<strong>明星一隻雞 → 松島纜車(趁Pass過期前) → 白淺灘文化村 → Having Moment → 南浦洞</strong>。
+        </div>
+
+        <div class="timeline-item food">
+            <div class="timeline-time">11:00</div>
+            <div class="timeline-title">🥣 午餐：影島明星一隻雞 (명성닭한마리)</div>
+            <div class="timeline-desc">
+                品嚐超濃郁鮮美的一隻雞湯。<br>
+                <a href="https://naver.me/FrigUDSX" target="_blank" class="link-btn">🗺️ Naver Map</a>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-time">12:30</div>
+            <div class="timeline-title">📸 白淺灘文化村 + 海景下午茶</div>
+            <div class="timeline-desc">
+                搭公車約14分鐘。走訪超美的海邊藍白文創小鎮。<br>
+                下午茶首選：<strong>Having Moment</strong>（推薦點黑芝麻奶油拿鐵☕）。<br>
+                <a href="https://naver.me/xLWAPvjS" target="_blank" class="link-btn">🗺️ 文化村</a>
+                <a href="https://naver.me/GSDABss1" target="_blank" class="link-btn">🗺️ Having Moment</a>
+            </div>
+        </div>
+        <div class="timeline-item important">
+            <div class="timeline-time">15:30</div>
+            <div class="timeline-title">🚠 松島海上纜車</div>
+            <div class="timeline-desc">
+                搭 Uber 約15分鐘 (₩6,700) 或搭公車約33分鐘。<br>
+                <span class="badge badge-pass">⭐ 適用釜山 PASS 免費換票</span><br>
+                <a href="https://naver.me/Fmf6KBhZ" target="_blank" class="link-btn">🗺️ Naver Map</a>
+            </div>
+        </div>
+        <div class="timeline-item food">
+            <div class="timeline-time">18:00</div>
+            <div class="timeline-title">🥣 晚餐：南浦洞商圈 + BIFF 廣場</div>
+            <div class="timeline-desc">
+                搭公車21分鐘或 Uber 9分鐘。<br>
+                <strong>美食清單：</strong><br>
+                1. <strong>단골손님</strong>：招牌毛蛤拌飯生牛肉 🥩<br>
+                2. <strong>布帳馬車</strong>：街頭道地魚板、辣炒年糕 🍢<br>
+                3. <strong>螞蟻家辣炒章魚🐙</strong>：經典必吃辣炒章魚牛腸蝦子。<br>
+                <a href="https://naver.me/GqfehZ9z" target="_blank" class="link-btn">🗺️ 단골손님</a>
+                <a href="https://naver.me/xhPhjrlr" target="_blank" class="link-btn">🗺️ 螞蟻家南浦店</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="day5" class="tab-content">
+        <div class="timeline-item">
+            <div class="timeline-time">11:30</div>
+            <div class="timeline-title">🧳 Check Out & 寄放行李</div>
+            <div class="timeline-desc">12:00 前辦理退房，行李繼續寄放在飯店，開始最後一天的西面站、田浦採購行程。</div>
+        </div>
+        <div class="timeline-item food">
+            <div class="timeline-time">10:00</div>
+            <div class="timeline-title">🥣 早餐：DIART 土耳其凱馬克麵包</div>
+            <div class="timeline-desc">
+                西面站人氣麵包店，體驗神奇美味的 Kaymak 奶油。<br>
+                <a href="https://naver.me/F3E97IRK" target="_blank" class="link-btn">🗺️ Naver Map</a>
+            </div>
+        </div>
+        <div class="timeline-item food">
+            <div class="timeline-time">13:00</div>
+            <div class="timeline-title">🥣 午餐二選一：李在模 Pizza 或 螞蟻家章魚</div>
+            <div class="timeline-desc">
+                <strong>1. 李在模 Pizza 西面店</strong>（起司控天堂，大推！）<br>
+                <strong>2. 螞蟻家 辣炒章魚西面店</strong><br>
+                <a href="https://naver.me/FhfLBpVC" target="_blank" class="link-btn">🗺️ 李在模</a>
+                <a href="https://naver.me/F1a8Gym8" target="_blank" class="link-btn">🗺️ 螞蟻家西面</a>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-time">14:30</div>
+            <div class="timeline-title">🛍️ 田浦最後大採購</div>
+            <div class="timeline-desc">
+                一定要去逛超美高質感的廚房家居選物店 <strong>Bracket Table</strong> 🍽️！<br>
+                <a href="https://naver.me/x6J5qivp" target="_blank" class="link-btn">🗺️ Bracket Table</a>
+            </div>
+        </div>
+        <div class="timeline-item important">
+            <div class="timeline-time">16:40</div>
+            <div class="timeline-title">🚌 拿行李前往機場</div>
+            <div class="timeline-desc">回飯店提領行李。搭乘地鐵2號線至沙上站，轉乘金海輕軌前往機場。</div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-time">19:00</div>
+            <div class="timeline-title">✈️ 機場報到與回台</div>
+            <div class="timeline-desc">抵達金海機場辦理登機。21:05 飛機起飛，22:25 抵達桃園國際機場 T1。</div>
+        </div>
+    </div>
+
+    <nav class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab(event, 'summary')">🏠 總覽</button>
+        <button class="tab-btn" onclick="switchTab(event, 'day1')">D1 (6/22)</button>
+        <button class="tab-btn" onclick="switchTab(event, 'day2')">D2 (6/23)</button>
+        <button class="tab-btn" onclick="switchTab(event, 'day3')">D3 (6/24)</button>
+        <button class="tab-btn" onclick="switchTab(event, 'day4')">D4 (6/25)</button>
+        <button class="tab-btn" onclick="switchTab(event, 'day5')">D5 (6/26)</button>
+    </nav>
+
+    <div class="copy-toast" id="toast">已複製到剪貼簿</div>
+
+    <script>
+        // 切換分頁
+        function switchTab(evt, tabId) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
+            const tabBtns = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < tabBtns.length; i++) {
+                tabBtns[i].classList.remove("active");
+            }
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            window.scrollTo(0, 0);
+        }
+
+        // 複製地址提示
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById("toast");
+                toast.style.display = "block";
+                setTimeout(() => { toast.style.display = "none"; }, 1500);
+            });
+        }
+
+        // 記帳運算邏輯
+        const baseRemain = 16834; // 30000 - 9873 - 2768 - 525
+        let expenses = JSON.parse(localStorage.getItem('busan_expenses')) || [];
+
+        function initBudget() {
+            const listEl = document.getElementById('expense-list');
+            listEl.innerHTML = '';
+            let totalSpent = 0;
+
+            expenses.forEach((item, index) => {
+                totalSpent += item.amount;
+                const li = document.createElement('li');
+                li.className = 'expense-item';
+                li.innerHTML = `<span>${item.name}</span><span>$${item.amount} <span class="delete-btn" onclick="deleteExpense(${index})">❌</span></span>`;
+                listEl.appendChild(li);
+            });
+
+            const currentRemain = baseRemain - totalSpent;
+            const remainEl = document.getElementById('total-remain');
+            remainEl.innerText = `$${currentRemain.toLocaleString()}`;
+
+            if(currentRemain < 2000) {
+                remainEl.style.color = '#FF6B6B';
+            } else {
+                remainEl.style.color = '#2192FF';
+            }
+        }
+
+        function addExpense() {
+            const nameIn = document.getElementById('exp-name');
+            const amountIn = document.getElementById('exp-amount');
+            
+            const name = nameIn.value.trim() || '未命名支出';
+            const amount = parseInt(amountIn.value);
+
+            if (isNaN(amount) || amount <= 0) {
+                alert('請輸入有效的台幣金額！');
+                return;
+            }
+
+            expenses.push({ name, amount });
+            localStorage.setItem('busan_expenses', JSON.stringify(expenses));
+            
+            nameIn.value = '';
+            amountIn.value = '';
+            initBudget();
+        }
+
+        function deleteExpense(index) {
+            expenses.splice(index, 1);
+            localStorage.setItem('busan_expenses', JSON.stringify(expenses));
+            initBudget();
+        }
+
+        // 初始化網頁數據
+        window.onload = initBudget;
+    </script>
+</body>
+</html>
